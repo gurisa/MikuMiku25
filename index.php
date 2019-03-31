@@ -21,7 +21,7 @@
           <div class="form-group row">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
               <label for="number">Teks</label>
-              <textarea class="form-control" name="plaintext" id="" cols="30" rows="7"></textarea>              
+              <textarea class="form-control" name="plaintext" id="" cols="30" rows="7"><?php echo isset($_POST['plaintext']) ? $_POST['plaintext'] : ''; ?></textarea>
             </div>
           </div>
           <div class="form-group row">
@@ -52,13 +52,18 @@
     </div>
     <?php if ($_SERVER['REQUEST_METHOD'] == 'POST') { ?>
       <?php require_once 'MikuMiku25.php'; ?>
+      <?php $miku = new MikuMiku25(); ?>
+      
       <div class="row">
         <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-          <pre>
-            <?php var_dump($_POST['plaintext']); ?>
-          </pre>
+          <div class="jumbotron">
+            <pre>
+              <?php echo $miku->setPlainText($_POST['plaintext'])->encrypt(); ?>
+            </pre>
+          </div>
         </div>
       </div>
+      
       <?php } ?>
   </div>
 
