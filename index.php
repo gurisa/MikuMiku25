@@ -2,15 +2,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>Enkripsi MikuMiku25</title>
+  <title>Kriptografi MikuMiku25</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body>
 
   <div class="container">
-    <div class="row">
+    <div class="row mt-3">
       <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-        <h1>Enkripsi MikuMiku25</h1>
+        <h1>Kriptografi MikuMiku25</h1>
         <hr>
       </div>
     </div>
@@ -21,19 +21,19 @@
           <div class="form-group row">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
               <label for="number">Teks</label>
-              <textarea class="form-control" name="plaintext" id="" cols="30" rows="7"><?php echo isset($_POST['plaintext']) ? $_POST['plaintext'] : ''; ?></textarea>
+              <textarea class="form-control" name="text" id="" cols="30" rows="7"><?php echo isset($_POST['text']) ? $_POST['text'] : ''; ?></textarea>
             </div>
           </div>
           <div class="form-group row">
             <div class="col-lg-8 col-md-6 col-sm-7 col-xs-6">
               <label for="number">Kunci</label>
-              <input class="form-control" type="text" name="key" id="" value="">
+              <input class="form-control" type="key" name="key" id="" value="">
             </div>
             <div class="col-lg-4 col-md-6 col-sm-5 col-xs-6">
               <label for="number">Jenis</label>
               <select class="form-control" name="type" id="">
-                <option value="encrypt">Enkripsi</option>
-                <option value="decrypt">Dekripsi</option>
+                <option value="encrypt" <?php echo ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['type']) && $_POST['type'] == 'encrypt') ? 'selected' : '' ?>>Enkripsi</option>
+                <option value="decrypt" <?php echo ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['type']) && $_POST['type'] == 'decrypt') ? 'selected' : '' ?>>Dekripsi</option>
               </select>
             </div>
           </div>
@@ -46,25 +46,42 @@
       </div>
       <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
         <div class="text-center">
+          <h3>Ini Miku</h3>
+          <p>Cuma hiasan 😍</p>
           <img src="https://vignette.wikia.nocookie.net/vocaloid/images/5/57/Miku_v4_bundle_art.png/revision/latest?cb=20181006092728" class="rounded" alt="...">
         </div>
       </div>
     </div>
-    <?php if ($_SERVER['REQUEST_METHOD'] == 'POST') { ?>
+    <?php if ($_SERVER['REQUEST_METHOD'] == 'POST' && !in_array(trim($_POST['text']), [null, '', ' '])) { ?>
       <?php require_once 'MikuMiku25.php'; ?>
       <?php $miku = new MikuMiku25(); ?>
       
       <div class="row">
-        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+        <div class="col-lg-8 col-md-12 col-sm-12 col-xs-12">
           <div class="jumbotron">
-            <pre>
-              <?php echo $miku->setPlainText($_POST['plaintext'])->encrypt(); ?>
-            </pre>
+            <?php 
+              $result = '';
+              if (isset($_POST['type']) && $_POST['type'] == 'encrypt') {
+                $result = $miku->setPlainText($_POST['text'])
+                  ->encrypt()->getChiperText();
+                $message = 'Chiper Text';
+              }
+              else if (isset($_POST['type']) && $_POST['type'] == 'decrypt') {
+                $result = $miku->setChiperText($_POST['text'])
+                  ->decrypt()->getPlainText();
+                $message = 'Plain Text';
+              }
+              else {
+                $message = 'Oops something wrong';
+              }
+            ?>
+            <div class="alert alert-success"><?php echo $message ?></div>
+            <div><?php echo $result; ?></div>
           </div>
         </div>
       </div>
       
-      <?php } ?>
+    <?php } ?>
   </div>
 
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
