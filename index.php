@@ -4,13 +4,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Kriptografi MikuMiku25</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <style>
+    .text-wrap {
+      word-wrap: break-word;
+    }
+  </style>
 </head>
 <body>
-
+	<?php if ($_SERVER['REQUEST_METHOD'] == 'POST') { ?>
+		<?php require_once 'MikuMiku25.php'; ?>
+		<?php $miku = new MikuMiku25(); ?>
+		<?php 
+			if (array_key_exists('generate_key', $_POST)) {
+				$_POST['key'] = $miku->getRandomString();
+			}	  	
+		?>
+	<?php } ?>
   <div class="container">
     <div class="row mt-3">
       <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-        <h1>Kriptografi MikuMiku25</h1>
+        <h1>Kriptografi MikuMiku2<sup>5</sup> </h1>
         <hr>
       </div>
     </div>
@@ -21,25 +34,29 @@
           <div class="form-group row">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
               <label for="number">Teks</label>
-              <textarea class="form-control" name="text" id="" cols="30" rows="7"><?php echo isset($_POST['text']) ? $_POST['text'] : ''; ?></textarea>
+              <textarea class="form-control" name="text" id="text" cols="30" rows="7"><?php echo isset($_POST['text']) ? $_POST['text'] : ''; ?></textarea>
             </div>
           </div>
           <div class="form-group row">
-            <div class="col-lg-8 col-md-6 col-sm-7 col-xs-6">
-              <label for="number">Kunci</label>
-              <input class="form-control" type="key" name="key" id="" value="">
+		  	<div class="col-lg-3 col-md-5 col-sm-4 col-xs-5">
+				<label for="number">Jenis</label>
+				<select class="form-control" name="type" id="type">
+					<option value="encrypt" <?php echo ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['type']) && $_POST['type'] == 'encrypt') ? 'selected' : '' ?>>Enkripsi</option>
+					<option value="decrypt" <?php echo ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['type']) && $_POST['type'] == 'decrypt') ? 'selected' : '' ?>>Dekripsi</option>
+				</select>
             </div>
-            <div class="col-lg-4 col-md-6 col-sm-5 col-xs-6">
-              <label for="number">Jenis</label>
-              <select class="form-control" name="type" id="">
-                <option value="encrypt" <?php echo ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['type']) && $_POST['type'] == 'encrypt') ? 'selected' : '' ?>>Enkripsi</option>
-                <option value="decrypt" <?php echo ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['type']) && $_POST['type'] == 'decrypt') ? 'selected' : '' ?>>Dekripsi</option>
-              </select>
+            <div class="col-lg-7 col-md-5 col-sm-6 col-xs-5">
+				<label for="number">Kunci (opsional)</label>
+				<input class="form-control" type="text" name="key" id="key" value="<?php echo isset($_POST['key']) ? $_POST['key'] : ''; ?>" maxlength="32">
             </div>
+			<div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+				<label for="">&nbsp;</label>
+				<button class="btn btn-secondary form-control btn-md" name="generate_key" type="submit">Buat</button>
+			</div>
           </div>
           <div class="form-group row">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-              <button class="btn btn-primary" type="submit">Proses</button>
+				<button class="btn btn-primary btn-block btn-md" name="generate_crypto" type="submit">Proses</button>
             </div>
           </div>
         </form>
@@ -52,32 +69,48 @@
         </div>
       </div>
     </div>
-    <?php if ($_SERVER['REQUEST_METHOD'] == 'POST' && !in_array(trim($_POST['text']), [null, '', ' '])) { ?>
-      <?php require_once 'MikuMiku25.php'; ?>
-      <?php $miku = new MikuMiku25(); ?>
-      
+
+    <?php if ($_SERVER['REQUEST_METHOD'] == 'POST' && array_key_exists('generate_crypto', $_POST)) { ?>
+
       <div class="row">
         <div class="col-lg-8 col-md-12 col-sm-12 col-xs-12">
-          <div class="jumbotron">
-            <?php 
-              $result = '';
-              if (isset($_POST['type']) && $_POST['type'] == 'encrypt') {
-                $result = $miku->setPlainText($_POST['text'])
-                  ->encrypt()->getChiperText();
-                $message = 'Chiper Text';
-              }
-              else if (isset($_POST['type']) && $_POST['type'] == 'decrypt') {
-                $result = $miku->setChiperText($_POST['text'])
-                  ->decrypt()->getPlainText();
-                $message = 'Plain Text';
-              }
-              else {
-                $message = 'Oops something wrong';
-              }
+			<?php 
+				$data = [
+					'result' => '',
+					'code' => '',
+					'color' => 'info',
+					'message' => '',
+				];
+				if (!in_array(trim($_POST['text']), [null, '', ' '])) {
+					if (isset($_POST['type']) && in_array($_POST['type'], ['encrypt', 'decrypt'])) {
+						if (isset($_POST['key']) && !empty($_POST['key'])) {
+							$miku = $miku->setKey($_POST['key']);
+						}
+						if ($_POST['type'] == 'encrypt') {
+							$data['result'] = $miku->setPlainText($_POST['text'])
+								->encrypt()->getChiperText();
+							$data['message'] = 'Hasil Enrkipsi (Chiper Text)';
+							$data['color'] = 'success';
+						}
+						else {
+							$data['result'] = $miku->setChiperText($_POST['text'])
+								->decrypt()->getPlainText();
+							$data['message'] = 'Hasil Dekripsi (Plain Text)';
+							$data['color'] = 'success';
+						}
+					}
+					else {
+						$data['color'] = 'warning';
+						$data['message'] = 'Oops, metode kriptografi tidak ditemukan';
+					}
+				}
+				else {
+					$data['color'] = 'danger';
+					$data['message'] = 'Oops, silahkan masukan teks';
+				}
             ?>
-            <div class="alert alert-success"><?php echo $message ?></div>
-            <div><?php echo $result; ?></div>
-          </div>
+			<div class="alert alert-<?php echo $data['color']; ?>"><?php echo $data['message']; ?></div>
+			<div class="jumbotron text-wrap"><?php echo $data['result']; ?></div>
         </div>
       </div>
       

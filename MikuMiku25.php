@@ -3,8 +3,8 @@
   class MikuMiku25 {
 
     private $plainText = '';
-	private $chiperText = '';
-	private $dictionary;
+    private $chiperText = '';
+    private $dictionary;
     private $key;
 
     public function __construct() {
@@ -12,8 +12,9 @@
 		$this->setDictionary($dictionary);
     }
 
-    public function encrypt() {
-		$plainText = str_split($this->plainText);
+    public function encrypt() {		
+		$plainText = $this->plainText;		
+		$plainText = str_split($plainText);
 		if (count($plainText) > 0) {
 			$result = '';
 			foreach ($plainText as $key => $value) {
@@ -26,13 +27,23 @@
 					$result .= $value;
 				}
 			}
+			$result = base64_encode($result);
+			if ($this->key && strlen($this->key) > 0) {
+				$result = $this->key . '$' . $result . $this->getRandomString(strlen($this->key));
+			}			
 			$this->setChiperText($result);
 		}
 		return $this;
     }
   
     public function decrypt() {
-		$chiperText = str_split($this->chiperText);
+		$chiperText = $this->chiperText;
+		if ($this->key && strlen($this->key) > 0) {
+			$chiperText = substr($chiperText, strlen($this->key) + 1);			
+			$chiperText = substr($chiperText, 0, strlen($chiperText) - strlen($this->key));
+		}		
+		$chiperText = base64_decode($chiperText);
+		$chiperText = str_split($chiperText);
 		if (count($chiperText) > 0) {
 			$result = '';
 			foreach ($chiperText as $key => $value) {
@@ -50,6 +61,15 @@
       	return $this;
     }
 
+	public function getRandomString($length = 32) {
+		$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+		$charactersLength = strlen($characters);
+		$randomString = '';
+		for ($i = 0; $i < $length; $i++) {
+			$randomString .= $characters[rand(0, $charactersLength - 1)];
+		}
+		return $randomString;
+	}
 
     /**
      * Get the value of plainText
