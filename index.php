@@ -65,7 +65,7 @@
         <div class="text-center">
           <h3>Ini Miku</h3>
           <p>Cuma hiasan 😍</p>
-          <img src="https://vignette.wikia.nocookie.net/vocaloid/images/5/57/Miku_v4_bundle_art.png/revision/latest?cb=20181006092728" class="rounded" alt="...">
+          <img src="asset/image/miku.png" class="rounded" alt="..." style="width: 200px;; height: 250px;">
         </div>
       </div>
     </div>
@@ -110,9 +110,11 @@
 				}
             ?>
 			<div class="alert alert-<?php echo $data['color']; ?>"><?php echo $data['message']; ?></div>
+			<?php if (isset($data['result']) && !empty($data['result']) && !in_array($data['result'], ['', ' ', null])) { ?>
 			<div class="jumbotron text-wrap"><?php echo $data['result']; ?></div>
         </div>
       </div>
+			<?php } ?>
       
     <?php } ?>
   </div>
