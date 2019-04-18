@@ -1,79 +1,73 @@
 <?php
 
-  class MikuMiku25 {
+  class Miku123 {
 
     private $plainText = '';
     private $chiperText = '';
 	private $dictionary;
 	private $substitution;
+	private $vocal;
     private $key;
 
 	// $japanese = [
 	// 	'぀',  'ぁ', 'あ',  'ぃ',  'い',  'ぅ',  'う',  'ぇ',  'え', 'ぉ', 'お',  'か',  'が',  'き',  'ぎ',  'く', 
 	// 	'ぐ',  'け', 'げ',  'こ',  'ご',  'さ',  'ざ',  'し',  'じ', 'す', 'ず',  'せ',  'ぜ',  'そ',  'ぞ',  'た', 
 	// 	'だ',  'ち', 'ぢ',  'っ',  'つ',  'づ',  'て',  'で',  'と', 'ど', 'な',  'に',  'ぬ',  'ね',  'の',  'は', 
-	// 	'ば',  'ぱ', 'ひ',  'び',  'ぴ',  'ふ',  'ぶ',  'ぷ',  'へ', 'べ', 'ぺ',  'ほ',  'ぼ',  'ぽ',  //'ま',  'み', 
+	// 	'ば',  'ぱ', 'ひ',  'び',  'ぴ',  'ふ',  'ぶ',  'ぷ',  'へ', 'べ', 'ぺ',  'ほ',  'ぼ',  'ぽ',  'ま',  'み', 
+
 	// 	// 'む',  'め', 'も',  'ゃ',  'や',  'ゅ',  'ゆ',  'ょ',  'よ', 'ら', 'り',  'る',  'れ',  'ろ',  'ゎ',  'わ', 
 	// 	// ゐ  ゑ  を  ん  ゔ  ゕ  ゖ  ゗  ゘  ゙  ゚  ゛  ゜  ゝ  ゞ  ゟ 
 	// ];
 
     public function __construct() {
-		$dictionary = array_merge(range('a', 'z'), range('A', 'Z'), range(0, 9));
-		$substitution = range(12352, 12413);
-		$this->setDictionary($dictionary);
-		$this->setSubstitution($substitution);
+		$this->dictionary = array_merge(range('a', 'z'), range('A', 'Z'), ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', ',']);
+		$this->substitution = range(12352, 12415);
+		$this->vocal = ['a', 'i', 'u', 'e', 'o', 'A', 'I', 'U', 'E', 'O'];
     }
 
     public function encrypt() {		
 		$plainText = $this->plainText;		
 		$plainText = str_split($plainText);
 		if (count($plainText) > 0) {
-			$result = $this->substitute($plainText);
-			// foreach ($plainText as $key => $value) {
-			// 	$index = array_search($value, $this->dictionary, true);
-			// 	if ($index !== false) {
-			// 		$index = ($index === count($this->dictionary) - 1) ? 1 : $index + 1;
-			// 		// $result .= $this->dictionary[$index];
-			// 		$result .= mb_chr($this->substitution[$index], 'utf8');
-			// 	}
-			// 	else {
-			// 		$result .= $value;
-			// 	}
-			// }
-			// $result = base64_encode($result);
-			if ($this->key && strlen($this->key) > 0) {
-				$key = $this->key;
-				$key = str_split($key);
-				$key = $this->substitute($key);
+			$result = '';
+			foreach ($plainText as $key => $value) {
+				$index = array_search($value, $this->vocal, true);
+				if ($index !== false) {
+					$index = ($index == count($this->vocal) - 1) ? 0 : $index + 1;
+					$value = $this->vocal[$index];
+				}
+				
+				$index = array_search($value, $this->dictionary, true);
+				if ($index !== false) {
+					if ($index < count($this->dictionary) - 2) {
+						$index = $index + 2;
+					}
+					else {
+						$index = $index - (count($this->dictionary) - 2);
+					}
+					$value = $this->dictionary[$index];
+				}
 
-				// $result = $this->getRandomString(strlen($this->key)) . '$' . $result . '$' . $this->key;
-				$result = $key . '@%' . $result . '@%' . $key;
-				// $result = base64_encode($result);
+				$index = array_search($value, $this->dictionary, true);
+				if ($index !== false) {
+					if ($index < count($this->dictionary) - 3) {
+						$index = $index + 3;
+					}
+					else {
+						$index = $index - (count($this->dictionary) - 3);
+					}
+					$value = mb_chr($this->substitution[$index], 'utf8');
+				}
+
+				$result .= $value;
 			}			
 			$this->setChiperText($result);
 		}
 		return $this;
 	}
-	  
+	
     public function decrypt() {
 		$chiperText = $this->chiperText;
-		
-		if ($this->key && strlen($this->key) > 0) {
-			// $chiperText = base64_decode($chiperText);
-
-			// $chiperText = substr($chiperText, strlen($this->key) + 1);
-			// $chiperText = substr($chiperText, 0, strlen($chiperText) - strlen($this->key) - 1);
-			$chiperText = explode('@%', $chiperText);
-			if (count($chiperText) == 3) {
-				$chiperText = $chiperText[1];
-			}
-			else {
-				$this->setPlainText('Gagal melakukan dekripsi');
-				return $this;
-			}
-		}		
-		// $chiperText = base64_decode($chiperText);
-		// $chiperText = str_split($chiperText);
 		$chiperLength = mb_strlen($chiperText, 'UTF-8');
 		$result = [];
 		for ($i = 0; $i < $chiperLength; $i++) {
@@ -85,37 +79,40 @@
 		if (count($chiperText) > 0) {
 			foreach ($chiperText as $key => $value) {
 				$ord = mb_ord($value, 'utf8');
-				// $index = array_search($value, $this->dictionary, true);
 				$index = array_search($ord, $this->substitution, true);
-				
 				if ($index !== false) {
-					$index = ($index === 0) ? count($this->dictionary) - 1 : $index - 1;
-					// $index = ($index === 0) ? count($this->substitution) - 1 : $index - 1;
-					$result .= $this->dictionary[$index];
+					if ($index > 2) {
+						$index = $index - 3;
+					}
+					else {
+						$index = $index + (count($this->dictionary) - 3);
+					}
+					$value = $this->dictionary[$index];
 				}
-				else {
-					$result .= $value;
+
+				$index = array_search($value, $this->dictionary, true);
+				if ($index !== false) {
+					if ($index > 1) {
+						$index = $index - 2;
+					}
+					else {
+						$index = $index + (count($this->dictionary) - 2);
+					}
+					$value = $this->dictionary[$index];
 				}
+
+				$index = array_search($value, $this->vocal, true);
+				if ($index !== false) {
+					$index = ($index > 0) ? $index - 1 : count($this->vocal) - 1;
+					$value = $this->vocal[$index];
+				}
+
+				$result .= $value;
 			}
 		}
 		$this->setPlainText($result);
       	return $this;
     }
-
-	public function substitute($data) {
-		$result = '';
-		foreach ($data as $key => $value) {
-			$index = array_search($value, $this->dictionary, true);
-			if ($index !== false) {
-				$index = ($index === count($this->dictionary) - 1) ? 1 : $index + 1;
-				$result .= mb_chr($this->substitution[$index], 'utf8');
-			}
-			else {
-				$result .= $value;
-			}
-		}
-		return $result;
-	}
 
 	public function getRandomString($length = 32) {
 		$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';

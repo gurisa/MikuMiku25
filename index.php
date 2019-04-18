@@ -2,7 +2,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>Kriptografi MikuMiku25</title>
+  <title>Kriptografi Miku123</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <style>
     .text-wrap {
@@ -12,8 +12,8 @@
 </head>
 <body>
 	<?php if ($_SERVER['REQUEST_METHOD'] == 'POST') { ?>
-		<?php require_once 'MikuMiku25.php'; ?>
-		<?php $miku = new MikuMiku25(); ?>
+		<?php require_once 'Miku123.php'; ?>
+		<?php $miku = new Miku123(); ?>
 		<?php 
 			if (array_key_exists('generate_key', $_POST)) {
 				$_POST['key'] = $miku->getRandomString();
@@ -23,7 +23,7 @@
   <div class="container">
     <div class="row mt-3">
       <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-        <h1>Kriptografi MikuMiku2<sup>5</sup> </h1>
+        <h1>Kriptografi Miku123</h1>
         <hr>
       </div>
     </div>
@@ -45,14 +45,18 @@
 					<option value="decrypt" <?php echo ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['type']) && $_POST['type'] == 'decrypt') ? 'selected' : '' ?>>Dekripsi</option>
 				</select>
             </div>
-            <div class="col-lg-7 col-md-5 col-sm-6 col-xs-5">
-				<label for="number">Kunci (opsional)</label>
-				<input class="form-control" type="text" name="key" id="key" value="<?php echo isset($_POST['key']) ? $_POST['key'] : ''; ?>" maxlength="32">
+			<div class="col-lg-9 col-md-7 col-sm-8 col-xs-7">
+				<label for="number">Password</label>
+				<input class="form-control" type="password" name="password" id="password" value="<?php echo isset($_POST['password']) ? $_POST['password'] : ''; ?>">
             </div>
-			<div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+            <!-- <div class="col-lg-7 col-md-5 col-sm-6 col-xs-5">
+				<label for="number">Kunci (opsional)</label>
+				<input class="form-control" type="text" name="key" id="key" value="<?php echo isset($_POST['key']) ? $_POST['key'] : ''; ?>">
+            </div> -->
+			<!-- <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
 				<label for="">&nbsp;</label>
 				<button class="btn btn-secondary form-control btn-md" name="generate_key" type="submit">Buat</button>
-			</div>
+			</div> -->
           </div>
           <div class="form-group row">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
@@ -65,13 +69,12 @@
         <div class="text-center">
           <h3>Ini Miku</h3>
           <p>Cuma hiasan 😍</p>
-          <img src="asset/image/miku.png" class="rounded" alt="..." style="width: 200px;; height: 250px;">
+          <img src="asset/image/miku.png" class="rounded" alt="Miku123" style="width: 200px;; height: 250px;">
         </div>
       </div>
     </div>
 
     <?php if ($_SERVER['REQUEST_METHOD'] == 'POST' && array_key_exists('generate_crypto', $_POST)) { ?>
-
       <div class="row">
         <div class="col-lg-8 col-md-12 col-sm-12 col-xs-12">
 			<?php 
@@ -87,16 +90,20 @@
 							$miku = $miku->setKey($_POST['key']);
 						}
 						if ($_POST['type'] == 'encrypt') {
-							$data['result'] = $miku->setPlainText($_POST['text'])
-								->encrypt()->getChiperText();
+							$data['result'] = $miku->setPlainText($_POST['text'])->encrypt()->getChiperText();
 							$data['message'] = 'Hasil Enrkipsi (Chiper Text)';
 							$data['color'] = 'success';
 						}
 						else {
-							$data['result'] = $miku->setChiperText($_POST['text'])
-								->decrypt()->getPlainText();
-							$data['message'] = 'Hasil Dekripsi (Plain Text)';
-							$data['color'] = 'success';
+							if ($_POST['password'] == "12111997") {
+								$data['result'] = $miku->setChiperText($_POST['text'])->decrypt()->getPlainText();
+								$data['message'] = 'Hasil Dekripsi (Plain Text)';
+								$data['color'] = 'success';
+							}
+							else {
+								$data['message'] = 'Password untuk dekripsi tidak valid';
+								$data['color'] = 'danger';
+							}
 						}
 					}
 					else {
@@ -112,10 +119,9 @@
 			<div class="alert alert-<?php echo $data['color']; ?>"><?php echo $data['message']; ?></div>
 			<?php if (isset($data['result']) && !empty($data['result']) && !in_array($data['result'], ['', ' ', null])) { ?>
 			<div class="jumbotron text-wrap"><?php echo $data['result']; ?></div>
+			<?php } ?>
         </div>
       </div>
-			<?php } ?>
-      
     <?php } ?>
   </div>
 
