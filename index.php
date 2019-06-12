@@ -82,7 +82,8 @@
 					'result' => '',
 					'code' => '',
 					'color' => 'info',
-					'message' => '',
+                    'message' => '',
+                    'step' => [],
 				];
 				if (!in_array(trim($_POST['text']), [null, '', ' '])) {
 					if (isset($_POST['type']) && in_array($_POST['type'], ['encrypt', 'decrypt'])) {
@@ -92,13 +93,15 @@
 						if ($_POST['type'] == 'encrypt') {
 							$data['result'] = $miku->setPlainText($_POST['text'])->encrypt()->getChiperText();
 							$data['message'] = 'Hasil Enrkipsi (Chiper Text)';
-							$data['color'] = 'success';
+                            $data['color'] = 'success';
+                            $data['step'] = $miku->getStep();
 						}
 						else {
 							if ($_POST['password'] == "12111997") {
 								$data['result'] = $miku->setChiperText($_POST['text'])->decrypt()->getPlainText();
 								$data['message'] = 'Hasil Dekripsi (Plain Text)';
-								$data['color'] = 'success';
+                                $data['color'] = 'success';
+                                $data['step'] = $miku->getStep();
 							}
 							else {
 								$data['message'] = 'Password untuk dekripsi tidak valid';
@@ -116,9 +119,28 @@
 					$data['message'] = 'Oops, silahkan masukan teks';
 				}
             ?>
-			<div class="alert alert-<?php echo $data['color']; ?>"><?php echo $data['message']; ?></div>
-			<?php if (isset($data['result']) && !empty($data['result']) && !in_array($data['result'], ['', ' ', null])) { ?>
-			<div class="jumbotron text-wrap"><?php echo $data['result']; ?></div>
+
+            
+            <div class="alert alert-<?php echo $data['color']; ?>"><?php echo $data['message']; ?></div>			
+            <?php if (isset($data['result']) && !empty($data['result']) && !in_array($data['result'], ['', ' ', null]) &&
+                    isset($data['step']) && count($data['step']) === 3) { ?>
+                <?php if ($_POST['type'] == 'encrypt') { ?>
+                    <div class="jumbotron text-wrap">
+                        <?php echo 'Vocal => ' . $data['step']['vocal'] . '<br>'; ?>
+                        <?php echo 'Alphabet => ' . $data['step']['alphabet'] . '<br>'; ?>
+                        <?php echo 'Unicode => ' . $data['step']['unicode'] . '<br>'; ?>
+                    </div>
+                <?php } ?>
+                <?php if ($_POST['type'] == 'decrypt') { ?>
+                    <div class="jumbotron text-wrap">
+                        <?php echo 'Unicode => ' . $data['step']['unicode'] . '<br>'; ?>
+                        <?php echo 'Alphabet => ' . $data['step']['alphabet'] . '<br>'; ?>
+                        <?php echo 'Vocal => ' . $data['step']['vocal'] . '<br>'; ?>                                                
+                    </div>
+                <?php } ?>
+			    <div class="jumbotron text-wrap">
+                    <?php echo $data['result']; ?>
+                </div>
 			<?php } ?>
         </div>
       </div>

@@ -8,6 +8,7 @@
 	private $substitution;
 	private $vocal;
     private $key;
+    private $step = [];
 
 	// $japanese = [
 	// 	'぀',  'ぁ', 'あ',  'ぃ',  'い',  'ぅ',  'う',  'ぇ',  'え', 'ぉ', 'お',  'か',  'が',  'き',  'ぎ',  'く', 
@@ -22,7 +23,12 @@
     public function __construct() {
 		$this->dictionary = array_merge(range('a', 'z'), range('A', 'Z'), ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', ',']);
 		$this->substitution = range(12352, 12415);
-		$this->vocal = ['a', 'i', 'u', 'e', 'o', 'A', 'I', 'U', 'E', 'O'];
+        $this->vocal = ['a', 'i', 'u', 'e', 'o', 'A', 'I', 'U', 'E', 'O'];
+        $this->step = [
+            'vocal' => '',
+            'alphabet' => '',
+            'unicode' => '',
+        ];
     }
 
     public function encrypt() {		
@@ -34,7 +40,8 @@
 				$index = array_search($value, $this->vocal, true);
 				if ($index !== false) {
 					$index = ($index == count($this->vocal) - 1) ? 0 : $index + 1;
-					$value = $this->vocal[$index];
+                    $value = $this->vocal[$index];
+                    $this->step['vocal'] .= $value;
 				}
 				
 				$index = array_search($value, $this->dictionary, true);
@@ -45,7 +52,8 @@
 					else {
 						$index = $index - (count($this->dictionary) - 2);
 					}
-					$value = $this->dictionary[$index];
+                    $value = $this->dictionary[$index];
+                    $this->step['alphabet'] .= $value;
 				}
 
 				$index = array_search($value, $this->dictionary, true);
@@ -56,7 +64,8 @@
 					else {
 						$index = $index - (count($this->dictionary) - 3);
 					}
-					$value = mb_chr($this->substitution[$index], 'utf8');
+                    $value = mb_chr($this->substitution[$index], 'utf8');
+                    $this->step['unicode'] .= $value;
 				}
 
 				$result .= $value;
@@ -87,7 +96,8 @@
 					else {
 						$index = $index + (count($this->dictionary) - 3);
 					}
-					$value = $this->dictionary[$index];
+                    $value = $this->dictionary[$index];
+                    $this->step['unicode'] .= $value;
 				}
 
 				$index = array_search($value, $this->dictionary, true);
@@ -98,13 +108,15 @@
 					else {
 						$index = $index + (count($this->dictionary) - 2);
 					}
-					$value = $this->dictionary[$index];
+                    $value = $this->dictionary[$index];
+                    $this->step['alphabet'] .= $value;
 				}
 
 				$index = array_search($value, $this->vocal, true);
 				if ($index !== false) {
 					$index = ($index > 0) ? $index - 1 : count($this->vocal) - 1;
-					$value = $this->vocal[$index];
+                    $value = $this->vocal[$index];
+                    $this->step['vocal'] .= $value;
 				}
 
 				$result .= $value;
@@ -223,6 +235,23 @@
 
 		return $this;
 	}
+
+    public function getStep() {
+        return $this->step;
+    }
+
+    public function getVocalStep() {
+        return $this->step['vocal'];
+    }
+
+    public function getAlphabetStep() {
+        return $this->step['alphabet'];
+    }
+
+    public function getUnicodeStep() {
+        return $this->step['unicode'];
+    }
+
   }
 
 	/* 
